@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediSmart Health System — Centro de Mando Clínico</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --font-display:'Space Grotesk',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-ui:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Consolas,"Liberation Mono",monospace;
+  --radius-sm:8px; --radius-md:12px; --radius-lg:18px; --radius-xl:24px;
+  --sidebar-w:250px;
+  --rojo:#E15361;      --rojo-soft:rgba(225,83,97,.13);      --rojo-ink:#C43E4C;
+  --naranja:#E08A44;   --naranja-soft:rgba(224,138,68,.13);  --naranja-ink:#B96A28;
+  --amarillo:#D3A631;  --amarillo-soft:rgba(211,166,49,.14); --amarillo-ink:#9C7A1C;
+  --verde:#33AD8C;     --verde-soft:rgba(51,173,140,.13);    --verde-ink:#22876C;
+}
+[data-theme="dark"]{
+  --rojo-ink:#FF8A96; --naranja-ink:#FFB878; --amarillo-ink:#F0D67C; --verde-ink:#6EEFC6;
+  --bg:#121722;
+  --bg-grad: radial-gradient(1200px 600px at 85% -10%, rgba(51,173,140,.06), transparent 60%), radial-gradient(900px 500px at -5% 110%, rgba(91,141,239,.05), transparent 60%);
+  --surface:#1A2130;
+  --surface-alt:#1E2636;
+  --surface-raised:#1E263690;
+  --border:#2A3341;
+  --border-strong:#3A4456;
+  --ink:#E7ECF3;
+  --ink-soft:#9AA7BC;
+  --ink-faint:#6B7A93;
+  --primary:#3FBFA8;
+  --primary-dark:#33AD8C;
+  --primary-soft:rgba(63,191,168,.14);
+  --primary-ink:#0F1520;
+  --accent2:#6E93E5;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.25);
+  --shadow-md:0 10px 26px rgba(0,0,0,.28);
+  --glass-blur:blur(10px);
+  --grid-line: rgba(154,167,188,.07);
+  --scrim: rgba(10,14,20,.65);
+}
+[data-theme="light"]{
+  --bg:#F1F5FB;
+  --bg-grad: radial-gradient(1200px 600px at 85% -10%, rgba(20,184,166,.08), transparent 60%), radial-gradient(900px 500px at -5% 110%, rgba(91,141,239,.07), transparent 60%);
+  --surface:#FFFFFF;
+  --surface-alt:#F5F8FC;
+  --surface-raised:#FFFFFFcc;
+  --border:#DCE5F0;
+  --border-strong:#C2D0E1;
+  --ink:#0E1A2B;
+  --ink-soft:#546881;
+  --ink-faint:#8497AF;
+  --primary:#0E9C8C;
+  --primary-dark:#0B7E72;
+  --primary-soft:rgba(14,156,140,.10);
+  --primary-ink:#FFFFFF;
+  --accent2:#3B6FE0;
+  --shadow-sm:0 1px 2px rgba(21,36,54,.06);
+  --shadow-md:0 10px 30px rgba(21,36,54,.10);
+  --glass-blur:blur(10px);
+  --grid-line: rgba(21,36,54,.05);
+  --scrim: rgba(15,25,40,.45);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-ui);
+  background:var(--bg-grad), var(--bg);
+  background-attachment:fixed;
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  transition:background-color .3s ease, color .3s ease;
+}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+}
+
+/* ---------- shell layout ---------- */
+.app-shell{display:flex;min-height:100vh;}
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:20;
+}
+.brand{display:flex;align-items:center;gap:11px;padding:20px 18px 18px;border-bottom:1px solid var(--border);}
+.brand-mark{width:36px;height:36px;flex-shrink:0;}
+.brand-name{font-family:var(--font-display);font-size:15.5px;font-weight:700;letter-spacing:.2px;line-height:1.15;}
+.brand-sub{font-size:10.5px;color:var(--ink-faint);margin-top:2px;letter-spacing:.4px;text-transform:uppercase;}
+
+.nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;}
+.nav-group-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-faint);padding:14px 12px 6px;}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--radius-sm);
+  border:1px solid transparent;background:none;color:var(--ink-soft);font-size:13px;font-weight:600;
+  text-align:left;width:100%;position:relative;
+}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;}
+.nav-item:hover{background:var(--surface-alt);color:var(--ink);}
+.nav-item[aria-selected="true"]{background:var(--primary-soft);color:var(--primary);border-color:color-mix(in srgb, var(--primary) 30%, transparent);}
+.nav-item .nav-label{flex:1;}
+.nav-badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--primary);color:var(--primary-ink);font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.nav-badge.alert{background:var(--rojo);color:#fff;}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--rojo);position:absolute;top:9px;right:11px;box-shadow:0 0 0 2px var(--surface);animation:pulseDot 1.4s infinite;}
+@keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+.sidebar-footer{padding:14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;}
+.theme-toggle{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:var(--radius-sm);background:var(--surface-alt);border:1px solid var(--border);}
+.theme-toggle span{font-size:11.5px;font-weight:600;color:var(--ink-soft);}
+.switch{position:relative;width:36px;height:20px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.switch-track{position:absolute;inset:0;background:var(--border-strong);border-radius:99px;transition:.2s;}
+.switch-track:before{content:"";position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+.switch input:checked + .switch-track{background:var(--primary);}
+.switch input:checked + .switch-track:before{transform:translateX(16px);}
+.reset-btn{width:100%;padding:8px 10px;border-radius:var(--radius-sm);border:1px dashed var(--border-strong);background:none;color:var(--ink-faint);font-size:11px;font-weight:600;}
+.reset-btn:hover{color:var(--ink-soft);border-color:var(--ink-faint);}
+
+.main-col{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+.topbar{
+  position:sticky;top:0;z-index:15;
+  background:var(--surface-raised);backdrop-filter:var(--glass-blur);
+  border-bottom:1px solid var(--border);padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+.topbar-title{font-family:var(--font-display);font-size:17px;font-weight:700;}
+.topbar-title span{font-family:var(--font-ui);font-weight:500;color:var(--ink-soft);font-size:12px;display:block;margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.status-chip{display:flex;align-items:center;gap:7px;background:var(--verde-soft);color:var(--verde-ink);padding:6px 12px;border-radius:99px;font-size:11.5px;font-weight:700;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--verde);animation:blink 2.2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+.clock{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);}
+
+.iot-banner{background:linear-gradient(90deg,#7A1522,#B5202C);color:#fff;padding:10px 28px;display:flex;align-items:center;gap:12px;font-size:12.5px;font-weight:600;}
+.iot-banner svg{width:17px;height:17px;flex-shrink:0;}
+.iot-banner button{margin-left:auto;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;padding:6px 12px;border-radius:var(--radius-sm);font-size:11.5px;font-weight:700;flex-shrink:0;}
+.iot-banner button:hover{background:rgba(255,255,255,.28);}
+.hidden{display:none !important;}
+
+.content{padding:26px 28px 60px;max-width:1280px;width:100%;margin:0 auto;flex:1;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;animation:fade .3s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+h1.page-title{font-family:var(--font-display);font-size:21px;margin:0 0 4px;}
+p.page-desc{color:var(--ink-soft);font-size:13px;margin:0 0 22px;max-width:680px;line-height:1.55;}
+.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--primary);margin:0 0 6px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);}
+.card-pad{padding:20px 22px;}
+
+/* ---------- buttons ---------- */
+.btn{padding:10px 16px;border-radius:var(--radius-sm);border:1px solid transparent;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+.btn svg{width:15px;height:15px;}
+.btn-primary{background:var(--primary);color:var(--primary-ink);}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px);}
+.btn-ghost{background:none;border-color:var(--border-strong);color:var(--ink-soft);}
+.btn-ghost:hover{color:var(--ink);border-color:var(--ink-faint);}
+.btn-danger{background:var(--rojo);color:#fff;}
+.btn-danger:hover{filter:brightness(1.1);}
+.btn-outline-danger{background:none;border-color:var(--rojo);color:var(--rojo-ink);}
+.btn-sm{padding:7px 12px;font-size:12px;}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none !important;}
+</style>
+</head>
+<body>
+<!-- ================= DASHBOARD / SOC ================= -->
+<style>
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+.kpi-card{position:relative;overflow:hidden;padding:18px 20px;}
+.kpi-card .kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.kpi-icon{width:30px;height:30px;border-radius:9px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;}
+.kpi-icon svg{width:16px;height:16px;}
+.kpi-value{font-family:var(--font-display);font-size:26px;font-weight:700;line-height:1;}
+.kpi-label{font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.4;}
+.kpi-wave{position:absolute;left:0;right:0;bottom:0;height:34px;opacity:.6;}
+
+.grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap;}
+.section-head h2{font-family:var(--font-display);font-size:15px;margin:0;}
+.section-head h3{font-family:var(--font-display);font-size:13.5px;margin:0;}
+
+.vlan-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:6px;}
+.vlan-chip{background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 10px 9px;text-align:center;}
+.vlan-chip .vname{font-size:10.5px;font-weight:700;color:var(--ink);letter-spacing:.2px;}
+.vlan-chip .vsub{font-size:9.5px;color:var(--ink-faint);margin-top:3px;}
+.vlan-chip .vdot{width:7px;height:7px;border-radius:50%;background:var(--verde);margin:0 auto 6px;box-shadow:0 0 8px var(--verde);}
+.vlan-chip.warn .vdot{background:var(--naranja);box-shadow:0 0 8px var(--naranja);}
+.vlan-chip.crit .vdot{background:var(--rojo);box-shadow:0 0 8px var(--rojo);}
+
+.bed-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+.bed-card{border-radius:var(--radius-md);border:1px solid var(--border);background:var(--surface-alt);padding:10px 10px 9px;position:relative;min-height:88px;display:flex;flex-direction:column;}
+.bed-card.occ{border-left:3px solid var(--bed-color,var(--primary));background:var(--surface);}
+.bed-card.free{align-items:center;justify-content:center;opacity:.6;}
+.bed-num{font-size:9.5px;font-weight:800;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.4px;}
+.bed-patient{font-size:12px;font-weight:700;margin:5px 0 6px;line-height:1.25;}
+.bed-empty{font-size:11px;color:var(--ink-faint);margin-top:4px;}
+.bed-card .pill{align-self:flex-start;margin-bottom:6px;}
+.bed-discharge{width:100%;justify-content:center;padding:5px 8px;font-size:10.5px;margin-top:auto;}
+
+.monitor-card{padding:0;overflow:hidden;}
+.monitor-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0;}
+.ecg-canvas-wrap{padding:6px 8px 14px;}
+canvas.ecg{width:100%;height:120px;display:block;}
+
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:10.5px;font-weight:700;}
+.pill-Rojo{background:var(--rojo-soft);color:var(--rojo-ink);}
+.pill-Naranja{background:var(--naranja-soft);color:var(--naranja-ink);}
+.pill-Amarillo{background:var(--amarillo-soft);color:var(--amarillo-ink);}
+.pill-Verde{background:var(--verde-soft);color:var(--verde-ink);}
+
+.mini-list{display:flex;flex-direction:column;gap:0;}
+.mini-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+.mini-row:last-child{border-bottom:none;}
+.mini-row .t{color:var(--ink-faint);font-family:var(--font-mono);font-size:11px;width:52px;flex-shrink:0;}
+.mini-row .txt{flex:1;color:var(--ink-soft);}
+
+.triage-dist{display:flex;height:10px;border-radius:99px;overflow:hidden;margin:10px 0 12px;}
+.triage-dist span{height:100%;}
+.dist-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft);}
+.dist-legend .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}
+</style>
+
+<!-- ================= TRIAGE FORM / RESULT ================= -->
+<style>
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:24px;}
+.form-grid .full{grid-column:1 / -1;}
+.field label{display:block;font-size:11.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.2px;}
+.field .hint{font-size:10.5px;color:var(--ink-faint);margin-top:5px;}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface-alt);font-size:13px;color:var(--ink);}
+.field input:focus,.field select:focus,.field textarea:focus{background:var(--surface);border-color:var(--primary);}
+.vitals-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.vitals-row .field input{font-family:var(--font-mono);}
+.unit-wrap{position:relative;}
+.unit-wrap .unit{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:10.5px;color:var(--ink-faint);pointer-events:none;}
+.form-actions{padding:16px 24px 24px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--border);}
+
+.result-hero{display:grid;grid-template-columns:220px 1fr;gap:0;}
+.result-badge-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:26px 18px;border-right:1px solid var(--border);}
+.score-ring{position:relative;width:140px;height:140px;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring .ring-bg{fill:none;stroke:var(--border);stroke-width:10;}
+.score-ring .ring-fg{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dasharray .6s ease;}
+.score-ring .ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-ring .ring-num .n{font-family:var(--font-display);font-size:30px;font-weight:700;line-height:1;}
+.score-ring .ring-num .u{font-size:9.5px;color:var(--ink-faint);margin-top:2px;}
+.level-tag{padding:6px 16px;border-radius:99px;font-weight:800;font-size:13px;letter-spacing:.3px;}
+.level-sub{font-size:11px;color:var(--ink-soft);text-align:center;}
+
+.result-detail{padding:26px 26px 22px;}
+.xai-bar-row{display:grid;grid-template-columns:150px 1fr 60px;align-items:center;gap:12px;padding:9px 0;}
+.xai-bar-row .lbl{font-size:12px;font-weight:600;color:var(--ink);}
+.xai-bar-row .lbl .sub{display:block;font-size:10px;font-weight:400;color:var(--ink-faint);}
+.xai-track{height:9px;background:var(--surface-alt);border-radius:99px;overflow:hidden;border:1px solid var(--border);}
+.xai-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.2,.8,.2,1);}
+.xai-pts{font-family:var(--font-mono);font-size:12px;text-align:right;color:var(--ink-soft);}
+.xai-note{margin-top:14px;padding:12px 14px;background:var(--surface-alt);border-radius:var(--radius-sm);border:1px solid var(--border);font-size:12px;color:var(--ink-soft);line-height:1.6;}
+.xai-note b{color:var(--ink);}
+
+.override-box{margin-top:18px;padding:16px;border:1px dashed var(--border-strong);border-radius:var(--radius-md);}
+.override-box h4{margin:0 0 10px;font-size:12.5px;font-family:var(--font-display);}
+.level-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.level-btn{padding:8px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border-strong);background:var(--surface);font-size:12px;font-weight:700;color:var(--ink-soft);}
+.level-btn[data-active="true"]{border-color:currentColor;box-shadow:0 0 0 1px currentColor inset;}
+.level-btn.Rojo[data-active="true"]{color:var(--rojo);background:var(--rojo-soft);}
+.level-btn.Naranja[data-active="true"]{color:var(--naranja);background:var(--naranja-soft);}
+.level-btn.Amarillo[data-active="true"]{color:var(--amarillo);background:var(--amarillo-soft);}
+.level-btn.Verde[data-active="true"]{color:var(--verde);background:var(--verde-soft);}
+.confirm-row{margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.confirm-note{font-size:11px;color:var(--ink-faint);flex:1;min-width:200px;}
+</style>
+<!-- ================= IoT SIMULATOR ================= -->
+<style>
+.device-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.device-card{padding:16px 16px 14px;position:relative;border-width:1px;}
+.device-card[data-status="alerta"]{border-color:var(--rojo);box-shadow:0 0 0 1px var(--rojo) inset;}
+.device-card[data-status="aislado"]{border-color:var(--ink-faint);opacity:.6;}
+.device-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.device-icon{width:32px;height:32px;border-radius:9px;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;color:var(--accent2);flex-shrink:0;}
+.device-icon svg{width:17px;height:17px;}
+.device-name{font-size:12.5px;font-weight:700;line-height:1.3;}
+.device-vlan{font-size:10px;color:var(--ink-faint);font-family:var(--font-mono);}
+.device-spark{height:34px;margin:8px 0;}
+.device-vitals{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);}
+.device-status-tag{position:absolute;top:14px;right:14px;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.3px;}
+.tag-normal{background:var(--verde-soft);color:var(--verde-ink);}
+.tag-alerta{background:var(--rojo-soft);color:var(--rojo-ink);animation:tagPulse 1.2s infinite;}
+.tag-aislado{background:rgba(148,163,184,.15);color:var(--ink-faint);}
+@keyframes tagPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+.anomaly-panel{margin-top:16px;padding:16px 18px;border-radius:var(--radius-md);background:var(--rojo-soft);border:1px solid rgba(240,71,90,.35);}
+.anomaly-panel h4{margin:0 0 6px;font-size:13px;color:var(--rojo-ink);font-family:var(--font-display);}
+.anomaly-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0;}
+.anomaly-metric{background:var(--surface);border-radius:var(--radius-sm);padding:9px 10px;text-align:center;border:1px solid var(--border);}
+.anomaly-metric .v{font-family:var(--font-mono);font-weight:700;font-size:14px;}
+.anomaly-metric .l{font-size:9.5px;color:var(--ink-faint);margin-top:2px;}
+.detect-log{margin-top:10px;font-size:12px;color:var(--ink);line-height:1.6;background:var(--surface);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border);}
+.detect-log code{font-family:var(--font-mono);background:var(--surface-alt);padding:1px 5px;border-radius:4px;font-size:11px;}
+</style>
+
+<!-- ================= WAR ROOM NIST ================= -->
+<style>
+.topo-wrap{padding:18px;overflow-x:auto;}
+.topo-svg{min-width:640px;width:100%;}
+.nist-timeline{display:flex;gap:0;margin:20px 0 8px;overflow-x:auto;padding-bottom:6px;}
+.nist-step{flex:1;min-width:150px;padding:14px 14px 14px 16px;border-left:2px solid var(--border-strong);position:relative;opacity:.45;transition:.3s;}
+.nist-step.done{opacity:1;}
+.nist-step.active{opacity:1;}
+.nist-step:before{content:"";position:absolute;left:-6.5px;top:16px;width:11px;height:11px;border-radius:50%;background:var(--border-strong);border:2px solid var(--surface);}
+.nist-step.done:before{background:var(--primary);}
+.nist-step.active:before{background:var(--rojo);box-shadow:0 0 0 4px var(--rojo-soft);}
+.nist-step .nt{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-faint);}
+.nist-step .nl{font-size:12.5px;font-weight:700;margin:3px 0 4px;}
+.nist-step .nd{font-size:11px;color:var(--ink-soft);line-height:1.5;}
+.nist-controls{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap;}
+.nist-progress{flex:1;height:6px;background:var(--surface-alt);border-radius:99px;overflow:hidden;min-width:120px;}
+.nist-progress-fill{height:100%;background:linear-gradient(90deg,var(--rojo),var(--primary));width:0%;transition:width .4s;}
+.finding-box{margin-top:16px;padding:14px 16px;border-radius:var(--radius-md);background:var(--primary-soft);border:1px solid color-mix(in srgb, var(--primary) 40%, transparent);font-size:12.5px;color:var(--ink);line-height:1.6;}
+.finding-box b{color:var(--primary);}
+.nist-step .nr{font-size:10.5px;color:var(--accent2);font-weight:700;margin-top:6px;}
+.nist-step .na{font-size:10.5px;color:var(--ink-faint);margin-top:2px;line-height:1.5;}
+.impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.impact-card{padding:13px 14px;border-radius:var(--radius-md);background:var(--surface-alt);border:1px solid var(--border);}
+.impact-card .v{font-family:var(--font-display);font-size:17px;font-weight:700;}
+.impact-card .l{font-size:10.5px;color:var(--ink-soft);margin-top:3px;line-height:1.4;}
+.impact-card.ok .v{color:var(--verde);}
+.impact-card.pending .v{color:var(--ink-faint);}
+.defense-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.defense-card{padding:14px 15px;border-radius:var(--radius-md);background:var(--surface-alt);border:1px solid var(--border);position:relative;}
+.defense-card .dn{font-size:9.5px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;}
+.defense-card h4{margin:5px 0 6px;font-size:12.5px;font-family:var(--font-display);}
+.defense-card p{margin:0;font-size:11px;color:var(--ink-soft);line-height:1.55;}
+.defense-card.hit{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary) inset;}
+</style>
+
+<!-- ================= SCALABILITY ================= -->
+<style>
+.phase-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.phase-tab{padding:9px 16px;border-radius:99px;border:1.5px solid var(--border-strong);background:var(--surface);font-size:12.5px;font-weight:700;color:var(--ink-soft);}
+.phase-tab[aria-selected="true"]{background:var(--primary);border-color:var(--primary);color:var(--primary-ink);}
+.scale-svg-wrap{padding:20px;overflow-x:auto;}
+.scale-svg{min-width:600px;width:100%;}
+.scale-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px;}
+.scale-kpi{padding:14px 16px;}
+.scale-kpi .v{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--primary);}
+.scale-kpi .l{font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.4;}
+.scale-note{margin-top:16px;font-size:12.5px;color:var(--ink-soft);line-height:1.65;background:var(--surface-alt);padding:14px 16px;border-radius:var(--radius-md);border:1px solid var(--border);}
+</style>
+
+<!-- ================= TABLE / MODAL / MISC ================= -->
+<style>
+.table-wrap{overflow-x:auto;}
+table.data-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+table.data-table th{text-align:left;padding:10px 14px;color:var(--ink-faint);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+table.data-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--ink);white-space:nowrap;}
+table.data-table tr:last-child td{border-bottom:none;}
+table.data-table tr:hover td{background:var(--surface-alt);}
+
+.modal-overlay{position:fixed;inset:0;background:var(--scrim);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);max-width:460px;width:100%;box-shadow:var(--shadow-md);}
+.modal-head{display:flex;align-items:center;gap:10px;padding:18px 22px 14px;border-bottom:1px solid var(--border);}
+.modal-head svg{width:20px;height:20px;color:var(--rojo);flex-shrink:0;}
+.modal-head h3{margin:0;font-size:14.5px;font-family:var(--font-display);}
+.modal-body{padding:18px 22px;font-size:12.5px;}
+.modal-body dl{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;margin:0 0 14px;font-size:12.5px;}
+.modal-body dt{color:var(--ink-faint);font-weight:600;}
+.modal-body dd{margin:0;font-family:var(--font-mono);color:var(--ink);}
+.modal-body .explain{background:var(--surface-alt);border-radius:var(--radius-sm);padding:12px 13px;line-height:1.6;color:var(--ink-soft);border:1px solid var(--border);}
+.modal-actions{display:flex;gap:10px;padding:14px 22px 20px;flex-wrap:wrap;}
+
+.footer-note{margin-top:34px;padding:16px 20px;border-radius:var(--radius-md);background:var(--surface-alt);border:1px solid var(--border);font-size:11.5px;color:var(--ink-faint);display:flex;gap:10px;align-items:flex-start;line-height:1.6;}
+.footer-note svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;color:var(--primary);}
+
+@media (max-width:1080px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+  .vlan-strip{grid-template-columns:repeat(3,1fr);}
+  .device-grid{grid-template-columns:repeat(2,1fr);}
+  .anomaly-metrics{grid-template-columns:repeat(2,1fr);}
+  .scale-kpis{grid-template-columns:1fr;}
+  .impact-grid,.defense-grid,.bed-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:760px){
+  .app-shell{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:relative;flex-direction:row;overflow-x:auto;}
+  .brand{border-bottom:none;border-right:1px solid var(--border);}
+  .nav{flex-direction:row;overflow-x:auto;padding:10px;}
+  .nav-group-label{display:none;}
+  .sidebar-footer{display:none;}
+  .form-grid,.vitals-row,.kpi-grid,.device-grid{grid-template-columns:1fr 1fr;}
+  .result-hero{grid-template-columns:1fr;}
+  .result-badge-col{border-right:none;border-bottom:1px solid var(--border);}
+}
+@media (max-width:520px){
+  .form-grid,.vitals-row,.kpi-grid,.device-grid,.anomaly-metrics{grid-template-columns:1fr;}
+  .impact-grid,.defense-grid,.bed-grid{grid-template-columns:1fr;}
+  .content{padding:18px 14px 50px;}
+}
+</style>
+<div class="app-shell">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
+        <rect width="40" height="40" rx="10" fill="var(--primary-soft)"/>
+        <path d="M8 21h5l2.5-7 4 14 3-9 2 4h7.5" stroke="var(--primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <div>
+        <div class="brand-name">MediSmart</div>
+        <div class="brand-sub">Centro de mando clínico</div>
+      </div>
+    </div>
+    <nav class="nav" id="navList" aria-label="Navegación principal">
+      <div class="nav-group-label">Operación</div>
+      <button class="nav-item" data-tab="soc" aria-selected="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 21h8M12 16v5"/></svg>
+        <span class="nav-label">Panel SOC</span>
+      </button>
+      <button class="nav-item" data-tab="triaje" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span class="nav-label">Triaje IA</span>
+        <span class="nav-badge" id="badgePendientes">0</span>
+      </button>
+      <button class="nav-item" data-tab="iot" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+        <span class="nav-label">IoT en vivo</span>
+        <span class="nav-dot hidden" id="navDotIot"></span>
+      </button>
+      <div class="nav-group-label">Ciberseguridad</div>
+      <button class="nav-item" data-tab="warroom" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4z"/></svg>
+        <span class="nav-label">War Room NIST</span>
+      </button>
+      <button class="nav-item" data-tab="auditoria" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/><path d="M9 15h6M9 11h6M9 7h2"/><path d="M17 3l4 4-9 9H8v-4l9-9z"/></svg>
+        <span class="nav-label">Auditoría</span>
+      </button>
+      <div class="nav-group-label">Planeación</div>
+      <button class="nav-item" data-tab="escala" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+        <span class="nav-label">Escalabilidad 5A</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="theme-toggle">
+        <span id="themeLabel">Modo claro</span>
+        <label class="switch">
+          <input type="checkbox" id="themeSwitch">
+          <span class="switch-track"></span>
+        </label>
+      </div>
+      <button class="reset-btn" id="resetBtn">Reiniciar demo</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN COLUMN ============ -->
+  <div class="main-col">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Panel SOC
+        <span>MediSmart · Clínica privada, Guayaquil · Grupo 5</span>
+      </div>
+      <div class="topbar-right">
+        <div class="status-chip"><span class="status-dot"></span> HIS/EMR operativo</div>
+        <div class="clock mono" id="clock">--:--:--</div>
+      </div>
+    </div>
+
+    <div class="iot-banner hidden" id="iotBanner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      <span id="iotBannerText">Anomalía de sensor detectada.</span>
+      <button id="bannerReviewBtn">Revisar</button>
+    </div>
+
+    <div class="content" id="content">
+      <!-- ===================== TAB: SOC DASHBOARD ===================== -->
+      <section class="tab-panel active" id="tab-soc" data-tab-panel="soc">
+        <p class="eyebrow">Centro de operaciones</p>
+        <h1 class="page-title">Pulso operativo en vivo</h1>
+        <p class="page-desc">No son metas de folleto: son cifras medidas en esta misma sesión del prototipo — 18 camas · 6 consultorios · 2 quirófanos menores · ≈85 colaboradores en el sistema.</p>
+
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <div class="grid-2">
+          <div class="card monitor-card">
+            <div class="monitor-head">
+              <h3 style="font-family:var(--font-display);font-size:13.5px;margin:0;">Monitor de signos vitales agregado</h3>
+              <span class="pill pill-Verde" id="pulseLevelTag">Verde</span>
+            </div>
+            <div class="ecg-canvas-wrap"><canvas class="ecg" id="ecgMain"></canvas></div>
+          </div>
+          <div class="card card-pad">
+            <div class="section-head"><h3>Distribución de pacientes por prioridad</h3></div>
+            <div class="triage-dist" id="triageDist"></div>
+            <div class="dist-legend" id="triageLegend"></div>
+            <div class="section-head" style="margin-top:20px;"><h3>Actividad reciente</h3></div>
+            <div class="mini-list" id="recentActivity"></div>
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-top:16px;">
+          <div class="section-head">
+            <h3>Mapa de camas — ocupación en tiempo real</h3>
+            <span class="pill pill-Verde" id="bedWaitPill">0 en espera de cama</span>
+          </div>
+          <p class="page-desc" style="margin:0 0 14px;">18 camas físicas. Cada paciente confirmado por enfermería ocupa la siguiente cama disponible; al darlo de alta, la cama vuelve a quedar libre para el siguiente ingreso.</p>
+          <div class="bed-grid" id="bedGrid"></div>
+        </div>
+
+        <div class="card card-pad" style="margin-top:16px;">
+          <div class="section-head"><h3>Segmentación de red — seis VLAN monitoreadas</h3></div>
+          <div class="vlan-strip" id="vlanStrip"></div>
+        </div>
+
+        <div class="footer-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <div>La supervisión humana es obligatoria en todo el flujo clínico: el motor de IA únicamente sugiere; el personal de enfermería confirma, eleva o reduce la prioridad final. Cumplimiento: LOPDP Ecuador Art. 31 · ISO/IEC 27799.</div>
+        </div>
+      </section>
+
+      <!-- ===================== TAB: TRIAJE ===================== -->
+      <section class="tab-panel" id="tab-triaje" data-tab-panel="triaje">
+        <p class="eyebrow">Prototipo interactivo</p>
+        <h1 class="page-title">Motor de triaje asistido por IA</h1>
+        <p class="page-desc">Evalúa exactamente 5 variables clínicas y asigna un puntaje de riesgo de 0 a 100 en tiempo real. La decisión final siempre corresponde al personal de enfermería.</p>
+
+        <div class="card" id="triageFormCard">
+          <form class="form-grid" id="triageForm">
+            <div class="field full">
+              <label for="pName">Nombre del paciente</label>
+              <input type="text" id="pName" placeholder="Ej. María Salazar" required>
+            </div>
+            <div class="field">
+              <label for="pEdad">Edad</label>
+              <input type="number" id="pEdad" min="0" max="120" placeholder="Años" required>
+            </div>
+            <div class="field">
+              <label for="pOrigen">Origen del registro</label>
+              <select id="pOrigen">
+                <option>Recepción presencial</option>
+                <option>Kiosco de autorregistro</option>
+                <option>Emergencia</option>
+                <option>Telemedicina</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label>Variables clínicas (motor de triaje IA — 5 variables, 0–100 pts)</label>
+              <div class="vitals-row">
+                <div class="field unit-wrap">
+                  <input type="number" id="vFc" placeholder="88" required><span class="unit">lpm · FC</span>
+                </div>
+                <div class="field unit-wrap">
+                  <input type="number" id="vPas" placeholder="120" required><span class="unit">mmHg · PAS</span>
+                </div>
+                <div class="field unit-wrap">
+                  <input type="number" id="vSpo2" placeholder="97" required><span class="unit">% · SpO₂</span>
+                </div>
+                <div class="field unit-wrap">
+                  <input type="number" step="0.1" id="vTemp" placeholder="36.8" required><span class="unit">°C · Temp</span>
+                </div>
+              </div>
+              <div class="hint">Frecuencia cardíaca, presión arterial sistólica, saturación de oxígeno y temperatura corporal.</div>
+            </div>
+            <div class="field full">
+              <label for="pMotivo">Motivo de consulta (5ª variable clínica)</label>
+              <select id="pMotivo" required></select>
+              <div class="hint">Cada motivo aporta hasta 20 puntos según severidad clínica típica asociada.</div>
+            </div>
+          </form>
+          <div class="form-actions">
+            <button class="btn btn-ghost" type="button" id="fillDemoBtn">Autocompletar ejemplo</button>
+            <button class="btn btn-primary" type="submit" form="triageForm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              Calcular puntaje IA
+            </button>
+          </div>
+        </div>
+
+        <div class="card hidden" id="resultCard" style="margin-top:18px;">
+          <div class="result-hero">
+            <div class="result-badge-col">
+              <div class="score-ring">
+                <svg viewBox="0 0 140 140" width="140" height="140">
+                  <circle class="ring-bg" cx="70" cy="70" r="60"/>
+                  <circle class="ring-fg" id="ringFg" cx="70" cy="70" r="60"/>
+                </svg>
+                <div class="ring-num"><span class="n" id="ringScore">0</span><span class="u">/ 100 pts</span></div>
+              </div>
+              <div class="level-tag" id="levelTagIA">—</div>
+              <div class="level-sub" id="levelSubIA">Tiempo objetivo de atención</div>
+            </div>
+            <div class="result-detail">
+              <div class="section-head"><h3>Explicabilidad del modelo (XAI) — atribución por variable</h3></div>
+              <div id="xaiBars"></div>
+              <div class="xai-note" id="xaiNote"></div>
+
+              <div class="override-box">
+                <h4>Decisión de enfermería (supervisión humana obligatoria)</h4>
+                <div class="level-btns" id="levelBtns">
+                  <button type="button" class="level-btn Rojo" data-level="Rojo">Rojo</button>
+                  <button type="button" class="level-btn Naranja" data-level="Naranja">Naranja</button>
+                  <button type="button" class="level-btn Amarillo" data-level="Amarillo">Amarillo</button>
+                  <button type="button" class="level-btn Verde" data-level="Verde">Verde</button>
+                </div>
+                <div class="confirm-row">
+                  <span class="confirm-note" id="confirmNote">Seleccione el nivel sugerido por la IA o ajústelo según criterio clínico.</span>
+                  <button class="btn btn-primary btn-sm" id="confirmBtn">Confirmar y registrar</button>
+                  <button class="btn btn-ghost btn-sm" id="newTriageBtn">Nuevo registro</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== TAB: IOT ===================== -->
+      <section class="tab-panel" id="tab-iot" data-tab-panel="iot">
+        <p class="eyebrow">Simulador multidispositivo</p>
+        <h1 class="page-title">Telemetría IoT en tiempo real</h1>
+        <p class="page-desc">Wearables, cámaras IP, sensores de cadena de frío, RFID y control biométrico transmiten en vivo. El validador algorítmico detecta lecturas fuera de rango fisiológico o patrones de spoofing y permite aislar el dispositivo en la VLAN IoT.</p>
+
+        <div class="section-head">
+          <h2>Dispositivos activos (VLAN IoT / Percepción)</h2>
+          <button class="btn btn-danger btn-sm" id="simSpoofBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+            Inyectar anomalía / spoofing
+          </button>
+        </div>
+        <div class="device-grid" id="deviceGrid"></div>
+
+        <div class="card card-pad hidden" id="anomalyCard" style="margin-top:18px;">
+          <div class="anomaly-panel" id="anomalyPanel"></div>
+        </div>
+      </section>
+
+      <!-- ===================== TAB: WAR ROOM NIST ===================== -->
+      <section class="tab-panel" id="tab-warroom" data-tab-panel="warroom">
+        <p class="eyebrow">Módulo de respuesta a incidentes</p>
+        <h1 class="page-title">War Room — Ransomware por phishing (NIST SP 800-61)</h1>
+        <p class="page-desc">Escenario: phishing dirigido a administración intenta cifrar el respaldo NAS. Ejecute la simulación paso a paso sobre la topología segmentada en seis VLAN.</p>
+
+        <div class="card topo-wrap">
+          <div class="section-head"><h3>Topología de red — seis VLAN</h3><span class="pill pill-Verde" id="topoStatusPill">Normal</span></div>
+          <svg class="topo-svg" id="topoSvg" viewBox="0 0 900 260"></svg>
+        </div>
+
+        <div class="card card-pad" style="margin-top:16px;">
+          <div class="section-head"><h3>Cronología del incidente</h3></div>
+          <div class="nist-timeline" id="nistTimeline"></div>
+          <div class="nist-controls">
+            <button class="btn btn-danger btn-sm" id="nistPlayBtn">▶ Reproducir simulación</button>
+            <button class="btn btn-ghost btn-sm" id="nistResetBtn">Reiniciar escenario</button>
+            <div class="nist-progress"><div class="nist-progress-fill" id="nistProgressFill"></div></div>
+            <span class="mono" id="nistTimeLabel" style="font-size:11.5px;color:var(--ink-soft);">08:14</span>
+          </div>
+          <div class="finding-box" id="findingBox">
+            <b>Hallazgo clave:</b> un permiso de escritura innecesario entre la VLAN administrativa y el respaldo — pendiente de simulación.
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-top:16px;">
+          <div class="section-head"><h3>Impacto y métricas de respuesta</h3></div>
+          <div class="impact-grid" id="impactGrid"></div>
+        </div>
+
+        <div class="card card-pad" style="margin-top:16px;">
+          <div class="section-head"><h3>Por qué no escaló: defensa en profundidad (6 capas)</h3></div>
+          <p class="page-desc" style="margin-bottom:14px;">Cada capa existía antes del incidente y limitó el radio de impacto de forma independiente — así es como una intrusión detectada a las 08:14 quedó contenida sin llegar a cifrar el respaldo activo.</p>
+          <div class="defense-grid" id="defenseGrid"></div>
+        </div>
+      </section>
+
+      <!-- ===================== TAB: AUDITORÍA ===================== -->
+      <section class="tab-panel" id="tab-auditoria" data-tab-panel="auditoria">
+        <p class="eyebrow">Trazabilidad LOPDP Art. 31</p>
+        <h1 class="page-title">Bitácora de auditoría</h1>
+        <p class="page-desc">Registro consolidado de evaluaciones de triaje y eventos de ciberseguridad de la sesión, con trazabilidad de decisiones IA vs. enfermería.</p>
+
+        <div class="card card-pad">
+          <div class="section-head"><h3>Pacientes evaluados</h3></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Hora</th><th>ID</th><th>Paciente</th><th>Puntaje</th><th>Factor principal</th><th>Nivel IA</th><th>Nivel enfermería</th><th>Modificado</th><th>Origen</th></tr></thead>
+              <tbody id="auditBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-top:16px;">
+          <div class="section-head"><h3>Eventos de ciberseguridad</h3></div>
+          <div class="mini-list" id="secEventsList"></div>
+        </div>
+      </section>
+
+      <!-- ===================== TAB: ESCALABILIDAD ===================== -->
+      <section class="tab-panel" id="tab-escala" data-tab-panel="escala">
+        <p class="eyebrow">Proyección arquitectónica</p>
+        <h1 class="page-title">Escalabilidad a 5 años</h1>
+        <p class="page-desc">Cada fase de expansión repite la identificación de vectores de amenaza: la postura de seguridad no se hereda automáticamente.</p>
+
+        <div class="phase-tabs" id="phaseTabs">
+          <button class="phase-tab" data-phase="1" aria-selected="true">Año 1–2</button>
+          <button class="phase-tab" data-phase="2" aria-selected="false">Año 2–3</button>
+          <button class="phase-tab" data-phase="3" aria-selected="false">Año 3–5</button>
+        </div>
+
+        <div class="card scale-svg-wrap">
+          <svg class="scale-svg" id="scaleSvg" viewBox="0 0 900 280"></svg>
+        </div>
+
+        <div class="scale-kpis" id="scaleKpis"></div>
+        <div class="scale-note" id="scaleNote"></div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============ IoT MODAL ============ -->
+<div class="modal-overlay hidden" id="iotModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      <h3>Anomalía de sensor detectada</h3>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" id="modalAislarBtn">Aislar en VLAN IoT</button>
+      <button class="btn btn-ghost btn-sm" id="modalDescartarBtn">Descartar (falso positivo)</button>
+      <button class="btn btn-ghost btn-sm" id="modalCerrarBtn">Cerrar</button>
+    </div>
+  </div>
+</div>
+<script>
+  /* =========================================================
+     0. CONSTANTES Y ESTADO GLOBAL (alcance de nivel superior:
+        compartido intencionalmente con los siguientes <script>)
+     ========================================================= */
+  const NIVEL_COLOR = {Rojo:'var(--rojo)', Naranja:'var(--naranja)', Amarillo:'var(--amarillo)', Verde:'var(--verde)'};
+  const RANK = {Verde:0, Amarillo:1, Naranja:2, Rojo:3};
+  const NIVEL_TIEMPO = {Rojo:'0 min · traslado directo a emergencia', Naranja:'≤ 15 minutos de espera', Amarillo:'≤ 60 minutos de espera', Verde:'Según disponibilidad de consultorio'};
+
+  const MOTIVOS = [
+    {label:"Dolor torácico agudo / sospecha cardíaca", pts:20},
+    {label:"Dificultad respiratoria severa", pts:20},
+    {label:"Trauma mayor / accidente de tránsito", pts:18},
+    {label:"Convulsiones activas", pts:18},
+    {label:"Hemorragia no controlada", pts:17},
+    {label:"Fiebre alta con signos de alarma", pts:14},
+    {label:"Dolor abdominal intenso", pts:12},
+    {label:"Fractura o esguince", pts:8},
+    {label:"Herida menor / laceración simple", pts:5},
+    {label:"Control post-operatorio de rutina", pts:3},
+    {label:"Consulta de seguimiento / receta", pts:2},
+  ];
+
+  const state = {
+    pacientes: [],
+    eventosSeguridad: [],
+    alertaIot: null,
+    lastScore: null,
+    scorePendingLevel: null,
+    warroom: {step:-1, playing:false},
+    scalePhase: 1,
+    ecgPhase: 0,
+    sessionStart: new Date(),
+  };
+  let nextPatientId = 1042;
+
+  /* =========================================================
+     1. TEMA Y NAVEGACIÓN
+     ========================================================= */
+  const root = document.documentElement;
+  const themeSwitch = document.getElementById('themeSwitch');
+  themeSwitch.addEventListener('change', ()=>{
+    const light = !themeSwitch.checked;
+    root.setAttribute('data-theme', light ? 'light' : 'dark');
+    document.getElementById('themeLabel').textContent = light ? 'Modo claro' : 'Modo oscuro';
+  });
+
+  const TAB_TITLES = {
+    soc:['Panel SOC','MediSmart · Clínica privada, Guayaquil · Grupo 5'],
+    triaje:['Triaje IA','Motor de priorización clínica — 5 variables, 0–100 pts'],
+    iot:['IoT en vivo','Telemetría de dispositivos médicos conectados'],
+    warroom:['War Room NIST','Simulación de respuesta a incidentes — SP 800-61'],
+    auditoria:['Auditoría','Trazabilidad LOPDP Ecuador Art. 31'],
+    escala:['Escalabilidad 5A','Proyección de arquitectura a 5 años'],
+  };
+
+  function irATab(tab){
+    document.querySelectorAll('.nav-item').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===tab)));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.dataset.tabPanel===tab));
+    const [title, sub] = TAB_TITLES[tab];
+    document.getElementById('topbarTitle').innerHTML = title + '<span>'+sub+'</span>';
+    window.scrollTo({top:0, behavior:'instant' in window ? 'instant':'auto'});
+  }
+  document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click', ()=>irATab(b.dataset.tab)));
+
+  function tickClock(){
+    document.getElementById('clock').textContent = new Date().toLocaleTimeString('es-EC', {hour12:false});
+  }
+
+  function fmt(d){ return d.toLocaleTimeString('es-EC', {hour12:false}); }
+  function esc(s){ return String(s).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+</script>
+<script>
+(function(){
+  "use strict";
+  /* =========================================================
+     2. MOTOR DE TRIAJE IA — 5 variables, 0-100 pts, XAI
+     ========================================================= */
+  function poblarMotivos(){
+    const sel = document.getElementById('pMotivo');
+    sel.innerHTML = MOTIVOS.map((m,i)=>`<option value="${i}">${m.label}</option>`).join('');
+  }
+
+  // Cada variable aporta 0-20 pts de forma CONTINUA según la distancia real
+  // al rango fisiológico normal (una función escalonada agrupaba casi todos
+  // los casos leves en el mismo "techo" de ~2 pts por variable; con una curva
+  // continua cada valor concreto produce un puntaje distinto y con variedad real).
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+  // pts = escala 0-20: 0-1 dentro del rango normal (variación mínima),
+  // sube de forma progresiva y no lineal (curva cuadrática) a medida que el valor
+  // se aleja del límite normal más cercano, hasta saturar en 20 en el límite crítico.
+  function curvaDesviacion(v, normLow, normHigh, critLow, critHigh){
+    if(v>=normLow && v<=normHigh){
+      // dentro de rango normal: pequeña variación 0-4 según cercanía al centro
+      const centro = (normLow+normHigh)/2, mitadRango = (normHigh-normLow)/2;
+      const dist = Math.abs(v-centro)/mitadRango; // 0 en el centro, 1 en el borde
+      return Math.round(dist*4);
+    }
+    if(v<normLow){
+      const dist = clamp((normLow-v)/(normLow-critLow), 0, 1);
+      return Math.round(4 + dist*16);
+    }
+    const dist = clamp((v-normHigh)/(critHigh-normHigh), 0, 1);
+    return Math.round(4 + dist*16);
+  }
+  function scoreFC(v){ return clamp(curvaDesviacion(v, 60, 100, 30, 180), 0, 20); }
+  function scorePAS(v){ return clamp(curvaDesviacion(v, 90, 129, 50, 220), 0, 20); }
+  function scoreSpO2(v){
+    if(v>=95) return Math.round(clamp((100-v)/5,0,1)*4);
+    return clamp(4 + clamp((95-v)/25,0,1)*16, 0, 20);
+  }
+  function scoreTemp(v){ return clamp(curvaDesviacion(v, 36.1, 37.5, 32, 41.5), 0, 20); }
+
+  function calcularTriage({fc,pas,spo2,temp,motivoIdx}){
+    const motivo = MOTIVOS[motivoIdx];
+    const factores = [
+      {clave:'fc', nombre:'Frecuencia cardíaca', valor:`${fc} lpm`, pts:scoreFC(fc)},
+      {clave:'pas', nombre:'Presión arterial sistólica', valor:`${pas} mmHg`, pts:scorePAS(pas)},
+      {clave:'spo2', nombre:'Saturación de O₂', valor:`${spo2}%`, pts:scoreSpO2(spo2)},
+      {clave:'temp', nombre:'Temperatura corporal', valor:`${temp.toFixed(1)} °C`, pts:scoreTemp(temp)},
+      {clave:'motivo', nombre:'Motivo de consulta', valor:motivo.label, pts:motivo.pts},
+    ];
+    const score = Math.max(0, Math.min(100, factores.reduce((s,f)=>s+f.pts,0)));
+    let nivel;
+    if(score>=80) nivel='Rojo';
+    else if(score>=60) nivel='Naranja';
+    else if(score>=35) nivel='Amarillo';
+    else nivel='Verde';
+    factores.sort((a,b)=>b.pts-a.pts);
+    return {score, nivel, factores, motivo};
+  }
+
+  function pillClass(pts){ return pts>=17?'pill-Rojo':pts>=12?'pill-Naranja':pts>=7?'pill-Amarillo':'pill-Verde'; }
+
+  function renderXAI(resultado){
+    const total = resultado.score || 1;
+    const bars = document.getElementById('xaiBars');
+    bars.innerHTML = resultado.factores.map(f=>{
+      const pct = Math.round((f.pts/total)*100);
+      const colorClass = pillClass(f.pts);
+      const colorVar = f.pts>=17?'var(--rojo)':f.pts>=12?'var(--naranja)':f.pts>=7?'var(--amarillo)':'var(--verde)';
+      return `<div class="xai-bar-row">
+        <div class="lbl">${f.nombre}<span class="sub">${esc(f.valor)}</span></div>
+        <div class="xai-track"><div class="xai-fill" style="width:${Math.max(4,(f.pts/20)*100)}%;background:${colorVar};"></div></div>
+        <div class="xai-pts">+${f.pts} <span style="color:var(--ink-faint);font-size:10px;">(${isNaN(pct)?0:pct}%)</span></div>
+      </div>`;
+    }).join('');
+    const top = resultado.factores[0];
+    document.getElementById('xaiNote').innerHTML =
+      `<b>Factor de mayor peso:</b> ${esc(top.nombre)} aportó ${top.pts} de 20 puntos posibles, el mayor peso relativo en la clasificación <b>${resultado.nivel}</b>. Estilo de atribución tipo SHAP/LIME: cada barra representa la contribución marginal de la variable al puntaje total (0–100). La IA solo sugiere; enfermería confirma.`;
+  }
+
+  function actualizarRing(score, nivel){
+    const circ = 2*Math.PI*60;
+    const ring = document.getElementById('ringFg');
+    ring.style.stroke = NIVEL_COLOR[nivel];
+    ring.style.strokeDasharray = `${(score/100)*circ} ${circ}`;
+    document.getElementById('ringScore').textContent = score;
+    const tag = document.getElementById('levelTagIA');
+    tag.textContent = 'Sugerido por IA: '+nivel;
+    tag.style.background = `color-mix(in srgb, ${NIVEL_COLOR[nivel]} 16%, transparent)`;
+    tag.style.color = NIVEL_COLOR[nivel];
+    document.getElementById('levelSubIA').textContent = NIVEL_TIEMPO[nivel];
+  }
+
+  function setLevelButtons(nivel){
+    document.querySelectorAll('.level-btn').forEach(b=>b.setAttribute('data-active', String(b.dataset.level===nivel)));
+    state.scorePendingLevel = nivel;
+    const overridden = nivel !== state.lastScore.nivel;
+    document.getElementById('confirmNote').textContent = overridden
+      ? `Nivel ajustado por enfermería (IA sugirió ${state.lastScore.nivel}). El cambio quedará registrado en auditoría.`
+      : 'Nivel confirmado según sugerencia del motor de IA.';
+  }
+  document.getElementById('levelBtns').addEventListener('click', e=>{
+    const btn = e.target.closest('.level-btn'); if(!btn) return;
+    setLevelButtons(btn.dataset.level);
+  });
+
+  document.getElementById('triageForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const fc = parseFloat(document.getElementById('vFc').value);
+    const pas = parseFloat(document.getElementById('vPas').value);
+    const spo2 = parseFloat(document.getElementById('vSpo2').value);
+    const temp = parseFloat(document.getElementById('vTemp').value);
+    const motivoIdx = parseInt(document.getElementById('pMotivo').value,10);
+    if([fc,pas,spo2,temp].some(v=>isNaN(v))) return;
+
+    const resultado = calcularTriage({fc,pas,spo2,temp,motivoIdx});
+    state.lastScore = {
+      ...resultado,
+      nombre: document.getElementById('pName').value || 'Paciente sin nombre',
+      edad: document.getElementById('pEdad').value,
+      origen: document.getElementById('pOrigen').value,
+    };
+    actualizarRing(resultado.score, resultado.nivel);
+    renderXAI(resultado);
+    setLevelButtons(resultado.nivel);
+    document.getElementById('resultCard').classList.remove('hidden');
+    document.getElementById('resultCard').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  document.getElementById('fillDemoBtn').addEventListener('click', ()=>{
+    // Generación verdaderamente aleatoria (no una lista fija de 3 casos):
+    // primero se sortea el NIVEL objetivo con pesos realistas de una guardia
+    // (pocos críticos, más casos leves/moderados) y luego cada signo vital se
+    // sortea dentro de ese nivel — así el resultado cubre con variedad real
+    // los 4 niveles (Rojo/Naranja/Amarillo/Verde), no solo Verde/Amarillo.
+    const NOMBRES = ['Jorge Ayala','Ana Loor','Camila Reyes','Pedro Salazar','Mónica Franco','Iván Cedeño','Lucía Paredes','Renato Vélez','Gabriela Zambrano','Andrés Ponce','Silvana Rojas','Carlos Intriago','Verónica Cañarte','Fernando Bravo'];
+    const rand = (min,max)=> Math.random()*(max-min)+min;
+    const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+    const s = Math.random();
+    const tier = s<0.14 ? 'Rojo' : s<0.34 ? 'Naranja' : s<0.64 ? 'Amarillo' : 'Verde';
+
+    let fc,pas,spo2,temp,motivoOpciones;
+    if(tier==='Rojo'){
+      fc = Math.random()<0.5 ? rand(150,195) : rand(28,42);
+      pas = Math.random()<0.5 ? rand(178,215) : rand(45,68);
+      spo2 = rand(68,85);
+      temp = Math.random()<0.5 ? rand(39.6,41.6) : rand(32.5,34.8);
+      motivoOpciones = [0,1,2,3];
+    } else if(tier==='Naranja'){
+      fc = Math.random()<0.5 ? rand(126,148) : rand(40,49);
+      pas = Math.random()<0.5 ? rand(150,177) : rand(66,79);
+      spo2 = rand(85,91);
+      temp = Math.random()<0.5 ? rand(38.6,39.5) : rand(34.8,35.4);
+      motivoOpciones = [2,3,4,5,6];
+    } else if(tier==='Amarillo'){
+      fc = Math.random()<0.5 ? rand(105,125) : rand(50,59);
+      pas = Math.random()<0.5 ? rand(132,149) : rand(80,89);
+      spo2 = rand(91,95);
+      temp = Math.random()<0.5 ? rand(37.6,38.5) : rand(35.5,36.0);
+      motivoOpciones = [4,5,6,7,8];
+    } else {
+      fc = rand(60,102);
+      pas = rand(92,130);
+      spo2 = rand(95,100);
+      temp = rand(36.1,37.5);
+      motivoOpciones = [7,8,9,10];
+    }
+
+    const nombre = pick(NOMBRES);
+    const edad = Math.round(rand(18,88));
+    const motivo = pick(motivoOpciones);
+
+    document.getElementById('pName').value = nombre;
+    document.getElementById('pEdad').value = edad;
+    document.getElementById('vFc').value = Math.round(fc);
+    document.getElementById('vPas').value = Math.round(pas);
+    document.getElementById('vSpo2').value = Math.min(100, Math.round(spo2));
+    document.getElementById('vTemp').value = Math.round(temp*10)/10;
+    document.getElementById('pMotivo').value = motivo;
+  });
+
+  document.getElementById('newTriageBtn').addEventListener('click', ()=>{
+    document.getElementById('triageForm').reset();
+    poblarMotivosSafe();
+    document.getElementById('resultCard').classList.add('hidden');
+    document.getElementById('triageFormCard').scrollIntoView({behavior:'smooth'});
+  });
+  function poblarMotivosSafe(){ document.getElementById('pMotivo').value = 0; }
+
+  document.getElementById('confirmBtn').addEventListener('click', ()=>{
+    if(!state.lastScore || !state.scorePendingLevel) return;
+    const s = state.lastScore;
+    const overridden = state.scorePendingLevel !== s.nivel;
+    const nuevoPaciente = {
+      id:'PX-'+(nextPatientId++), nombre:s.nombre, timestamp:new Date(),
+      score:s.score, factorPrincipal:s.factores[0], nivelIA:s.nivel,
+      nivelEnfermera:state.scorePendingLevel, overridden, origen:s.origen,
+      cama:null, alta:false,
+    };
+    window.__ms_asignarCama(nuevoPaciente);
+    state.pacientes.push(nuevoPaciente);
+    if(nuevoPaciente.cama===null){
+      state.eventosSeguridad.unshift({timestamp:new Date(), descripcion:`${esc(s.nombre)} ingresó sin cama disponible — queda en espera.`, accion:'En espera'});
+    }
+    if(overridden){
+      state.eventosSeguridad.unshift({
+        timestamp:new Date(),
+        descripcion:`Ajuste clínico: enfermería cambió a ${s.nombre} de ${s.nivel} a ${state.scorePendingLevel} (auditado, LOPDP Art. 31).`,
+        accion:'Registrado',
+      });
+    }
+    renderAuditoria();
+    window.__ms_renderDashboard();
+    window.__ms_actualizarBadges();
+    window.__ms_actualizarPulsoGlobal();
+    document.getElementById('confirmNote').textContent = `Registrado: ${s.nombre} → ${state.scorePendingLevel}. Puede iniciar un nuevo triaje.`;
+  });
+
+  window.__ms_calcularTriage = calcularTriage;
+  window.__ms_poblarMotivos = poblarMotivos;
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  /* =========================================================
+     3. PANEL SOC — métricas EN VIVO (no promesas, datos reales
+        computados del propio estado del prototipo en esta sesión),
+        ECG canvas, distribución, VLAN
+     ========================================================= */
+  const ICONS = {
+    clock:'<path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>',
+    shield:'<path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4z"/>',
+    server:'<rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/>',
+    coin:'<path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/><path d="M9 15h6M9 11h6M9 7h2"/><path d="M17 3l4 4-9 9H8v-4l9-9z"/>',
+  };
+  // Genera una traza tipo ECG distinta para cada tarjeta (semilla por índice),
+  // en vez de repetir el mismo trazo estático en las 4 — variedad real, no decorativa.
+  function trazaKpi(seed){
+    const beats = 3;
+    let d = 'M0 20';
+    for(let b=0;b<beats;b++){
+      const cx = 18 + b*62 + (seed*7)%14;
+      const amp = 10 + ((seed*13 + b*9) % 9);
+      d += ` L${cx-10} 20 L${cx-4} ${20-amp*0.3} L${cx} ${20+amp} L${cx+4} ${20-amp*0.55} L${cx+9} 20`;
+    }
+    d += ' L200 20';
+    return d;
+  }
+  function renderKPIs(){
+    const totalPac = state.pacientes.length;
+    const activos = state.pacientes.filter(p=>!p.alta).length;
+    const anomalias = state.eventosSeguridad.filter(e=>e.accion==='Aislado'||e.accion==='Descartado').length;
+    const ocupadas = state.pacientes.filter(p=>!p.alta && p.cama).length;
+    const libres = Math.max(0, TOTAL_CAMAS - ocupadas);
+    const ajustadas = state.pacientes.filter(p=>p.overridden).length;
+
+    const cards = [
+      {icon:'clock', value:String(totalPac), label:totalPac===1?'Paciente evaluado por el motor de triaje en esta sesión':'Pacientes evaluados por el motor de triaje en esta sesión'},
+      {icon:'shield', value:String(anomalias), label:anomalias===0?'Anomalías IoT detectadas hasta ahora':'Anomalías IoT detectadas y resueltas por el equipo'},
+      {icon:'server', value:`${libres}/${TOTAL_CAMAS}`, label:'Camas disponibles en este momento'},
+      {icon:'coin', value: totalPac>0 ? `${ajustadas} de ${totalPac}` : '0 de 0', label:'Casos donde enfermería ajustó la sugerencia de la IA'},
+    ];
+    document.getElementById('kpiGrid').innerHTML = cards.map((k,i)=>`
+      <div class="card kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICONS[k.icon]}</svg></div>
+        </div>
+        <div class="kpi-value">${k.value}</div>
+        <div class="kpi-label">${k.label}</div>
+        <svg class="kpi-wave" viewBox="0 0 200 34" preserveAspectRatio="none"><path d="${trazaKpi(i+1)}" fill="none" stroke="var(--primary)" stroke-width="1.6" opacity="0.55"/></svg>
+      </div>`).join('');
+  }
+
+  const VLANS = [
+    {name:'VLAN-ADMIN', sub:'Administración'},
+    {name:'VLAN-CLINICA', sub:'HIS / EMR'},
+    {name:'VLAN-IOT', sub:'Percepción'},
+    {name:'VLAN-DMZ', sub:'Perímetro'},
+    {name:'VLAN-NUBE', sub:'Respaldo NAS'},
+    {name:'VLAN-USERS', sub:'Estaciones'},
+  ];
+  function renderVlanStrip(){
+    const alerta = state.alertaIot && state.alertaIot.estado==='pendiente';
+    const incidente = state.warroom.step>=0 && state.warroom.step<4;
+    document.getElementById('vlanStrip').innerHTML = VLANS.map(v=>{
+      let cls='';
+      if(v.name==='VLAN-IOT' && alerta) cls='warn';
+      if(v.name==='VLAN-NUBE' && incidente) cls='crit';
+      if(v.name==='VLAN-ADMIN' && incidente) cls='warn';
+      return `<div class="vlan-chip ${cls}"><div class="vdot"></div><div class="vname">${v.name}</div><div class="vsub">${v.sub}</div></div>`;
+    }).join('');
+  }
+
+  function renderTriageDist(){
+    const counts = {Rojo:0,Naranja:0,Amarillo:0,Verde:0};
+    state.pacientes.forEach(p=>{ counts[p.nivelEnfermera||p.nivelIA]++; });
+    const total = Math.max(1, state.pacientes.length);
+    const dist = document.getElementById('triageDist');
+    dist.innerHTML = ['Rojo','Naranja','Amarillo','Verde'].map(n=>{
+      const w = (counts[n]/total)*100;
+      return w>0 ? `<span style="width:${w}%;background:${NIVEL_COLOR[n]};" title="${n}: ${counts[n]}"></span>` : '';
+    }).join('');
+    document.getElementById('triageLegend').innerHTML = ['Rojo','Naranja','Amarillo','Verde'].map(n=>
+      `<span><span class="dot" style="background:${NIVEL_COLOR[n]};"></span>${n} · ${counts[n]}</span>`).join('');
+  }
+
+  function renderRecentActivity(){
+    const items = [...state.pacientes].sort((a,b)=>b.timestamp-a.timestamp).slice(0,5);
+    const box = document.getElementById('recentActivity');
+    if(items.length===0){ box.innerHTML = `<div class="mini-row"><span class="txt" style="color:var(--ink-faint);">Sin evaluaciones registradas aún en esta sesión.</span></div>`; return; }
+    box.innerHTML = items.map(p=>`<div class="mini-row"><span class="t">${fmt(p.timestamp)}</span><span class="txt">${esc(p.nombre)} clasificado <b style="color:${NIVEL_COLOR[p.nivelEnfermera||p.nivelIA]}">${p.nivelEnfermera||p.nivelIA}</b>${p.alta?' · <span style=\"color:var(--ink-faint)\">dado de alta</span>':''}</span></div>`).join('');
+  }
+
+  /* ---------- Mapa de camas — interactividad del panel SOC ---------- */
+  const TOTAL_CAMAS = 18;
+  function asignarCama(paciente){
+    const ocupadas = new Set(state.pacientes.filter(p=>!p.alta && p.cama).map(p=>p.cama));
+    for(let i=1;i<=TOTAL_CAMAS;i++){
+      if(!ocupadas.has(i)){ paciente.cama = i; return i; }
+    }
+    paciente.cama = null; // sin camas libres: paciente queda en espera
+    return null;
+  }
+  function renderBedGrid(){
+    const grid = document.getElementById('bedGrid');
+    if(!grid) return;
+    let html = '';
+    for(let i=1;i<=TOTAL_CAMAS;i++){
+      const p = state.pacientes.find(pt=>!pt.alta && pt.cama===i);
+      if(p){
+        const nivel = p.nivelEnfermera||p.nivelIA;
+        html += `<div class="bed-card occ" style="--bed-color:${NIVEL_COLOR[nivel]}">
+          <div class="bed-num">Cama ${i}</div>
+          <div class="bed-patient">${esc(p.nombre)}</div>
+          <span class="pill pill-${nivel}">${nivel}</span>
+          <button class="btn btn-ghost btn-sm bed-discharge" data-patient="${p.id}">Dar de alta</button>
+        </div>`;
+      } else {
+        html += `<div class="bed-card free"><div class="bed-num">Cama ${i}</div><div class="bed-empty">Disponible</div></div>`;
+      }
+    }
+    grid.innerHTML = html;
+    const enEspera = state.pacientes.filter(p=>!p.alta && !p.cama).length;
+    const pill = document.getElementById('bedWaitPill');
+    pill.textContent = enEspera + ' en espera de cama';
+    pill.className = 'pill ' + (enEspera>0 ? 'pill-Naranja' : 'pill-Verde');
+  }
+  document.getElementById('bedGrid').addEventListener('click', e=>{
+    const btn = e.target.closest('.bed-discharge'); if(!btn) return;
+    const p = state.pacientes.find(pt=>pt.id===btn.dataset.patient);
+    if(p){
+      p.alta = true;
+      state.eventosSeguridad.unshift({timestamp:new Date(), descripcion:`${esc(p.nombre)} fue dado de alta — cama ${p.cama} liberada.`, accion:'Alta'});
+      p.cama = null;
+    }
+    renderDashboard();
+    if(typeof renderAuditoria === 'function') renderAuditoria();
+  });
+
+  function renderDashboard(){
+    renderKPIs(); renderVlanStrip(); renderTriageDist(); renderRecentActivity(); renderBedGrid();
+  }
+
+  /* ---------- ECG canvas (Canvas API, señal sintética) ---------- */
+  const ecgCanvas = document.getElementById('ecgMain');
+  const ecgCtx = ecgCanvas.getContext('2d');
+  let ecgBuffer = [];
+  function ecgBeatShape(t){
+    // t in [0,1): synthetic PQRST-like waveform
+    if(t<0.12) return Math.sin(t/0.12*Math.PI)*0.08;
+    if(t<0.18) return 0;
+    if(t<0.20) return -0.15;
+    if(t<0.24) return 1.0;
+    if(t<0.28) return -0.3;
+    if(t<0.40) return Math.sin((t-0.28)/0.12*Math.PI)*0.22;
+    return 0;
+  }
+  function resizeEcg(){
+    const rect = ecgCanvas.getBoundingClientRect();
+    ecgCanvas.width = rect.width*devicePixelRatio;
+    ecgCanvas.height = rect.height*devicePixelRatio;
+  }
+  function drawEcg(){
+    const w = ecgCanvas.width, h = ecgCanvas.height;
+    ecgCtx.clearRect(0,0,w,h);
+    const cs = getComputedStyle(root);
+    ecgCtx.strokeStyle = cs.getPropertyValue('--grid-line').trim();
+    ecgCtx.lineWidth = 1;
+    for(let x=0;x<w;x+=w/20){ ecgCtx.beginPath(); ecgCtx.moveTo(x,0); ecgCtx.lineTo(x,h); ecgCtx.stroke(); }
+    for(let y=0;y<h;y+=h/6){ ecgCtx.beginPath(); ecgCtx.moveTo(0,y); ecgCtx.lineTo(w,y); ecgCtx.stroke(); }
+
+    let worst = 'Verde';
+    state.pacientes.forEach(p=>{ const n=p.nivelEnfermera||p.nivelIA; if(RANK[n]>RANK[worst]) worst=n; });
+    if(state.alertaIot && state.alertaIot.estado==='pendiente') worst = RANK[worst]>RANK.Naranja?worst:'Naranja';
+    const color = cs.getPropertyValue('--'+({Rojo:'rojo',Naranja:'naranja',Amarillo:'amarillo',Verde:'primary'}[worst])).trim() || cs.getPropertyValue('--primary').trim();
+    document.getElementById('pulseLevelTag').className = 'pill pill-'+worst;
+    document.getElementById('pulseLevelTag').textContent = worst;
+
+    const speed = {Rojo:0.055, Naranja:0.045, Amarillo:0.032, Verde:0.024}[worst];
+    state.ecgPhase += speed;
+    ecgCtx.beginPath();
+    ecgCtx.strokeStyle = color; ecgCtx.lineWidth = 2*devicePixelRatio; ecgCtx.lineJoin='round';
+    const N = 260, mid = h*0.55, amp = h*0.34;
+    for(let i=0;i<N;i++){
+      const t = ((i/N*4) + state.ecgPhase) % 1;
+      const y = mid - ecgBeatShape(t)*amp;
+      const x = (i/N)*w;
+      if(i===0) ecgCtx.moveTo(x,y); else ecgCtx.lineTo(x,y);
+    }
+    ecgCtx.stroke();
+    ecgCtx.shadowColor = color; ecgCtx.shadowBlur = 8; ecgCtx.stroke(); ecgCtx.shadowBlur = 0;
+    requestAnimationFrame(drawEcg);
+  }
+  window.addEventListener('resize', resizeEcg);
+
+  function actualizarBadges(){
+    const pendientes = state.pacientes.filter(p=>!p.nivelEnfermera).length;
+    document.getElementById('badgePendientes').textContent = state.pacientes.length;
+    const alertaActiva = state.alertaIot && state.alertaIot.estado === 'pendiente';
+    document.getElementById('navDotIot').classList.toggle('hidden', !alertaActiva);
+  }
+  function actualizarPulsoGlobal(){ /* consumed continuously inside drawEcg */ }
+
+  window.__ms_renderDashboard = renderDashboard;
+  window.__ms_asignarCama = asignarCama;
+  window.__ms_actualizarBadges = actualizarBadges;
+  window.__ms_actualizarPulsoGlobal = actualizarPulsoGlobal;
+  window.__ms_resizeEcg = resizeEcg;
+  window.__ms_drawEcg = drawEcg;
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  /* =========================================================
+     4. SIMULADOR IoT MULTIDISPOSITIVO
+     ========================================================= */
+  const RANGOS_FISIOLOGICOS = {
+    fc:{min:40, max:180, label:'lpm'},
+    spo2:{min:70, max:100, label:'%'},
+    temp:{min:30, max:42, label:'°C'},
+  };
+
+  const DEVICES = [
+    {id:'WB-2201', tipo:'Wearable cardíaco', metric:'fc', base:78, vlan:'VLAN-IOT', icono:'watch'},
+    {id:'WB-1187', tipo:'Wearable SpO₂', metric:'spo2', base:97, vlan:'VLAN-IOT', icono:'watch'},
+    {id:'CF-0410', tipo:'Sensor cadena de frío', metric:'temp', base:4.2, vlan:'VLAN-IOT', icono:'thermo', unit:'°C', range:[2,8]},
+    {id:'CAM-118', tipo:'Cámara IP — Quirófano 2', metric:'status', base:0, vlan:'VLAN-IOT', icono:'cam'},
+    {id:'RFID-07', tipo:'Control de acceso RFID', metric:'status', base:0, vlan:'VLAN-USERS', icono:'rfid'},
+    {id:'BIO-03', tipo:'Biométrico — Farmacia', metric:'status', base:0, vlan:'VLAN-USERS', icono:'bio'},
+  ];
+  const DEVICE_STATE = DEVICES.map(d=>({...d, status:'normal', valor:d.base, history:Array(24).fill(d.base)}));
+
+  const DEV_ICON = {
+    watch:'<circle cx="12" cy="12" r="6"/><path d="M12 9v3l2 2M9 4h6M9 20h6"/>',
+    thermo:'<path d="M14 14.76V4a2 2 0 0 0-4 0v10.76a4 4 0 1 0 4 0z"/>',
+    cam:'<rect x="2" y="6" width="15" height="12" rx="2"/><path d="M17 10l5-3v10l-5-3"/>',
+    rfid:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h6M7 12h10M7 16h4"/>',
+    bio:'<path d="M12 3a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V7a4 4 0 0 0-4-4z"/><path d="M6 21c0-3 2.5-5 6-5s6 2 6 5"/>',
+  };
+
+  function sparkPath(hist,w,h){
+    const min=Math.min(...hist), max=Math.max(...hist), span=(max-min)||1;
+    return hist.map((v,i)=>{
+      const x=(i/(hist.length-1))*w;
+      const y=h-((v-min)/span)*h;
+      return (i===0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1);
+    }).join(' ');
+  }
+
+  function renderDeviceGrid(){
+    const grid = document.getElementById('deviceGrid');
+    grid.innerHTML = DEVICE_STATE.map(d=>{
+      const isNum = d.metric!=='status';
+      const unit = d.unit || (RANGOS_FISIOLOGICOS[d.metric]?RANGOS_FISIOLOGICOS[d.metric].label:'');
+      const val = isNum ? (d.metric==='temp'&&d.id.startsWith('CF')? d.valor.toFixed(1) : Math.round(d.valor)) : (d.status==='normal'?'OK':d.status==='alerta'?'ALERTA':'AISLADO');
+      const tagCls = d.status==='normal'?'tag-normal':d.status==='alerta'?'tag-alerta':'tag-aislado';
+      const path = sparkPath(d.history, 100, 30);
+      const strokeColor = d.status==='alerta' ? 'var(--rojo)' : 'var(--accent2)';
+      return `<div class="card device-card" data-status="${d.status}">
+        <span class="device-status-tag ${tagCls}">${d.status==='normal'?'Normal':d.status==='alerta'?'Alerta':'Aislado'}</span>
+        <div class="device-top">
+          <div class="device-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${DEV_ICON[d.icono]}</svg></div>
+          <div><div class="device-name">${d.id}</div><div class="device-vlan">${d.tipo} · ${d.vlan}</div></div>
+        </div>
+        <svg class="device-spark" viewBox="0 0 100 30" preserveAspectRatio="none"><path d="${path}" fill="none" stroke="${strokeColor}" stroke-width="1.6"/></svg>
+        <div class="device-vitals"><span>${isNum? val+' '+unit : val}</span><span style="color:var(--ink-faint);">${d.status==='aislado'?'sin flujo':'en línea'}</span></div>
+      </div>`;
+    }).join('');
+  }
+
+  function tickTelemetry(){
+    DEVICE_STATE.forEach(d=>{
+      if(d.status==='aislado') return;
+      if(d.metric==='fc'||d.metric==='spo2'||d.metric==='temp'){
+        if(d.status!=='alerta'){
+          const drift = (Math.random()-0.5) * (d.metric==='temp'?0.15:1.6);
+          d.valor = d.valor + drift;
+          if(d.id.startsWith('CF')) d.valor = Math.min(8, Math.max(2, d.valor));
+          else if(d.metric==='fc') d.valor = Math.min(105, Math.max(62, d.valor));
+          else if(d.metric==='spo2') d.valor = Math.min(100, Math.max(94, d.valor));
+        }
+      }
+      d.history.push(d.valor); if(d.history.length>24) d.history.shift();
+    });
+    renderDeviceGrid();
+  }
+
+  /* ---------- detección algorítmica de spoofing ---------- */
+  const ESCENARIOS = [
+    {metric:'fc', valor:512, motivo:'Frecuencia cardíaca fuera del rango fisiológico humano (40–180 lpm)'},
+    {metric:'spo2', valor:12, motivo:'Saturación de O₂ por debajo del mínimo compatible con signos vitales (70–100%)'},
+    {metric:'temp', valor:55.4, motivo:'Temperatura corporal incompatible con tejido vivo (30–42°C)'},
+    {metric:'fc', valor:2, motivo:'Frecuencia cardíaca por debajo del umbral mínimo detectable'},
+  ];
+
+  function detectarAnomalia(metric, valor){
+    const r = RANGOS_FISIOLOGICOS[metric];
+    if(!r) return {anomalo:false};
+    if(valor < r.min || valor > r.max){
+      return {anomalo:true, regla:`valor ∉ [${r.min}, ${r.max}] ${r.label}`};
+    }
+    return {anomalo:false};
+  }
+
+  function simularSpoofing(){
+    const candidatos = DEVICE_STATE.filter(d=>['fc','spo2','temp'].includes(d.metric) && d.status==='normal');
+    if(candidatos.length===0) return;
+    const dev = candidatos[Math.floor(Math.random()*candidatos.length)];
+    const esc = ESCENARIOS.filter(e=>e.metric===dev.metric);
+    const escenario = (esc.length?esc:ESCENARIOS)[Math.floor(Math.random()*(esc.length?esc.length:ESCENARIOS.length))];
+    const det = detectarAnomalia(escenario.metric, escenario.valor);
+
+    dev.status = 'alerta';
+    dev.valor = escenario.valor;
+    dev.history.push(escenario.valor); if(dev.history.length>24) dev.history.shift();
+
+    state.alertaIot = {
+      deviceId: dev.id, dispositivo: dev.id+' · '+dev.tipo, metric:escenario.metric,
+      valor:escenario.valor, motivo:escenario.motivo, regla:det.regla,
+      timestamp:new Date(), estado:'pendiente',
+    };
+    renderDeviceGrid();
+    renderAnomalyPanel();
+    mostrarBannerIot();
+    abrirModalIot();
+    window.__ms_actualizarBadges();
+  }
+  document.getElementById('simSpoofBtn').addEventListener('click', simularSpoofing);
+
+  function renderAnomalyPanel(){
+    const a = state.alertaIot;
+    const card = document.getElementById('anomalyCard');
+    if(!a){ card.classList.add('hidden'); return; }
+    card.classList.remove('hidden');
+    document.getElementById('anomalyPanel').innerHTML = `
+      <h4>Anomalía detectada por el validador de integridad</h4>
+      <div style="font-size:12px;color:var(--ink-soft);">Dispositivo <b style="color:var(--ink);">${esc(a.dispositivo)}</b> · Detectado ${fmt(a.timestamp)}</div>
+      <div class="anomaly-metrics">
+        <div class="anomaly-metric"><div class="v">${a.valor}</div><div class="l">Valor reportado</div></div>
+        <div class="anomaly-metric"><div class="v">${a.regla || '—'}</div><div class="l">Regla violada</div></div>
+        <div class="anomaly-metric"><div class="v">${a.estado==='pendiente'?'Pendiente':'Resuelto'}</div><div class="l">Estado</div></div>
+        <div class="anomaly-metric"><div class="v">${a.metric.toUpperCase()}</div><div class="l">Variable afectada</div></div>
+      </div>
+      <div class="detect-log">${esc(a.motivo)}. La lectura fue <b>bloqueada por el validador de integridad</b> antes de ingresar al motor de triaje IA — regla aplicada: <code>${esc(a.regla||'rango fisiológico')}</code>. No afectó ninguna clasificación de pacientes.</div>
+    `;
+  }
+
+  function mostrarBannerIot(){
+    const b = document.getElementById('iotBanner');
+    document.getElementById('iotBannerText').textContent = `Dispositivo ${state.alertaIot.dispositivo} reportó valores fuera de rango fisiológico. Requiere revisión de ciberseguridad.`;
+    b.classList.remove('hidden');
+  }
+  function ocultarBannerIot(){ document.getElementById('iotBanner').classList.add('hidden'); }
+  document.getElementById('bannerReviewBtn').addEventListener('click', ()=>{ irATab('iot'); abrirModalIot(); });
+
+  function abrirModalIot(){
+    const a = state.alertaIot;
+    document.getElementById('modalBody').innerHTML = `
+      <dl>
+        <dt>Dispositivo</dt><dd>${esc(a.dispositivo)}</dd>
+        <dt>VLAN</dt><dd>VLAN-IOT</dd>
+        <dt>Valor reportado</dt><dd>${a.valor}</dd>
+        <dt>Regla violada</dt><dd style="font-size:11px;">${esc(a.regla||'—')}</dd>
+        <dt>Detectado</dt><dd style="color:var(--ink);">${fmt(a.timestamp)}</dd>
+      </dl>
+      <div class="explain">${esc(a.motivo)}. La lectura fue <b>bloqueada por el validador de integridad</b> antes de ingresar al motor de triaje IA, por lo que no afectó ninguna clasificación de pacientes.</div>
+    `;
+    document.getElementById('iotModal').classList.remove('hidden');
+  }
+  function cerrarModal(){ document.getElementById('iotModal').classList.add('hidden'); }
+
+  function resolverAlerta(accion){
+    if(!state.alertaIot){ cerrarModal(); return; }
+    const dev = DEVICE_STATE.find(d=>d.id===state.alertaIot.deviceId);
+    state.eventosSeguridad.unshift({
+      timestamp:new Date(),
+      descripcion:`${state.alertaIot.dispositivo}: ${state.alertaIot.motivo}.`,
+      accion: accion,
+    });
+    if(accion === 'Aislado' && dev){ dev.status='aislado'; }
+    if(accion === 'Descartado' && dev){ dev.status='normal'; }
+    if(accion !== 'Sin acción'){ state.alertaIot.estado='resuelto'; ocultarBannerIot(); }
+    cerrarModal();
+    renderDeviceGrid(); renderAnomalyPanel(); renderAuditoria(); window.__ms_actualizarBadges(); window.__ms_renderDashboard();
+  }
+  document.getElementById('modalAislarBtn').addEventListener('click', ()=>resolverAlerta('Aislado'));
+  document.getElementById('modalDescartarBtn').addEventListener('click', ()=>resolverAlerta('Descartado'));
+  document.getElementById('modalCerrarBtn').addEventListener('click', ()=>resolverAlerta('Sin acción'));
+
+  window.__ms_renderDeviceGrid = renderDeviceGrid;
+  window.__ms_tickTelemetry = tickTelemetry;
+  window.__ms_ocultarBannerIot = ocultarBannerIot;
+  window.__ms_DEVICE_STATE = DEVICE_STATE;
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  /* =========================================================
+     5. WAR ROOM — SIMULACIÓN NIST SP 800-61
+     ========================================================= */
+  const NIST_STEPS = [
+    {t:'08:14', l:'Detección', d:'SIEM correlaciona un pico de cifrado en el NAS y escala la alerta al equipo de respuesta.', resp:'SOC / SIEM automatizado', accion:'Correlación de eventos: tasa de escritura anómala + proceso desconocido firmando archivos en lote.'},
+    {t:'08:18', l:'Contención', d:'Se aísla la cuenta comprometida y se corta el acceso a la carpeta compartida administrativa.', resp:'Analista de respuesta a incidentes', accion:'Deshabilitación de credenciales AD + revocación de sesión activa vía IAM/RBAC.'},
+    {t:'08:24', l:'Bloqueo C2', d:'Se bloquea en el firewall next-gen la IP de mando y control del script malicioso.', resp:'Ingeniero de red / firewall', accion:'Regla de bloqueo saliente aplicada en el firewall perimetral; IP reportada a threat intel.'},
+    {t:'08:34', l:'Erradicación', d:'El endpoint es retirado, analizado y reinstalado desde una imagen limpia certificada.', resp:'Equipo de endpoint / EDR', accion:'Aislamiento físico del equipo, análisis forense de artefactos, reimagen desde base dorada.'},
+    {t:'09:00', l:'Recuperación', d:'Restauración desde snapshot inmutable del NAS — RTO real: 22 minutos.', resp:'Administrador de respaldo', accion:'Verificación de integridad del snapshot air-gap y restauración a producción bajo supervisión.'},
+  ];
+
+  const IMPACT_KPIS = [
+    {v:'1', l:'Cuenta comprometida aislada'},
+    {v:'1', l:'IP de C2 bloqueada en firewall'},
+    {v:'1', l:'Endpoint reimagen desde base limpia'},
+    {v:'22 min', l:'RTO real del respaldo (objetivo &lt;15 min)'},
+  ];
+
+  const NODES = [
+    {id:'admin', x:110, y:60, label:'VLAN-ADMIN', sub:'Administración'},
+    {id:'clinica', x:290, y:60, label:'VLAN-CLINICA', sub:'HIS / EMR'},
+    {id:'iot', x:470, y:60, label:'VLAN-IOT', sub:'Percepción'},
+    {id:'dmz', x:110, y:190, label:'VLAN-DMZ', sub:'Firewall / IPS'},
+    {id:'nube', x:290, y:190, label:'VLAN-NUBE', sub:'Respaldo NAS'},
+    {id:'users', x:470, y:190, label:'VLAN-USERS', sub:'Estaciones'},
+    {id:'attacker', x:700, y:125, label:'Actor externo', sub:'Phishing / C2'},
+  ];
+  const EDGES = [['admin','dmz'],['clinica','dmz'],['iot','dmz'],['dmz','nube'],['users','dmz'],['dmz','attacker']];
+
+  function nodeById(id){ return NODES.find(n=>n.id===id); }
+
+  function renderTopology(){
+    const svg = document.getElementById('topoSvg');
+    const step = state.warroom.step;
+    const compromised = step>=0 && step<4; // hasta erradicación
+    const contained = step>=1;
+    const blocked = step>=2;
+    const recovered = step>=4;
+
+    let edgesHtml = EDGES.map(([a,b])=>{
+      const na=nodeById(a), nb=nodeById(b);
+      let stroke = 'var(--border-strong)', dash='';
+      if(a==='dmz'&&b==='attacker'){ stroke = blocked ? 'var(--ink-faint)' : (step>=0?'var(--rojo)':'var(--border-strong)'); dash = blocked?'4 4':''; }
+      if(a==='dmz'&&b==='nube'){ stroke = (compromised && !recovered) ? 'var(--rojo)' : 'var(--border-strong)'; }
+      if(a==='admin'&&b==='dmz'){ stroke = (step===0) ? 'var(--naranja)' : (contained?'var(--verde)':'var(--border-strong)'); }
+      return `<line x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" stroke="${stroke}" stroke-width="2" stroke-dasharray="${dash}"/>`;
+    }).join('');
+
+    let nodesHtml = NODES.map(n=>{
+      let fill = 'var(--surface-alt)', stroke='var(--border-strong)', ring='';
+      if(n.id==='attacker'){ fill='var(--rojo-soft)'; stroke='var(--rojo)'; }
+      if(n.id==='nube' && compromised && !recovered){ stroke='var(--rojo)'; ring=`<circle cx="${n.x}" cy="${n.y}" r="30" fill="none" stroke="var(--rojo)" stroke-width="1.5" opacity="0.5"><animate attributeName="r" values="24;34;24" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="1.6s" repeatCount="indefinite"/></circle>`; }
+      if(n.id==='nube' && recovered){ stroke='var(--verde)'; }
+      if(n.id==='admin' && step===0){ stroke='var(--naranja)'; }
+      if(n.id==='admin' && contained){ stroke='var(--verde)'; }
+      if(n.id==='iot'){ stroke = (state.alertaIot && state.alertaIot.estado==='pendiente') ? 'var(--naranja)' : 'var(--border-strong)'; }
+      return `${ring}<g>
+        <rect x="${n.x-46}" y="${n.y-22}" width="92" height="44" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>
+        <text x="${n.x}" y="${n.y-2}" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--ink)" font-family="Inter, sans-serif">${n.label}</text>
+        <text x="${n.x}" y="${n.y+12}" text-anchor="middle" font-size="8.5" fill="var(--ink-faint)" font-family="Inter, sans-serif">${n.sub}</text>
+      </g>`;
+    }).join('');
+
+    svg.innerHTML = edgesHtml + nodesHtml;
+
+    const pill = document.getElementById('topoStatusPill');
+    if(step<0){ pill.className='pill pill-Verde'; pill.textContent='Normal'; }
+    else if(step<2){ pill.className='pill pill-Rojo'; pill.textContent='Incidente activo'; }
+    else if(step<4){ pill.className='pill pill-Naranja'; pill.textContent='Contenido'; }
+    else { pill.className='pill pill-Verde'; pill.textContent='Recuperado'; }
+  }
+
+  const DEFENSE_LAYERS = [
+    {n:'Capa 1', t:'Perímetro y borde', d:'Firewall next-gen + IPS bloquean firmas de ransomware conocidas; rate limiting ante DDoS.', hitOn:2},
+    {n:'Capa 2', t:'Segmentación VLAN', d:'VLAN administrativa aislada de la clínica; contención automática de cualquier VLAN comprometida.', hitOn:1},
+    {n:'Capa 3', t:'Identidad y acceso', d:'MFA obligatorio, RBAC y autenticación por certificado — permitió revocar la cuenta en segundos.', hitOn:1},
+    {n:'Capa 4', t:'Endpoint', d:'EDR con detección de comportamiento y listas de aplicaciones permitidas identificó el proceso anómalo.', hitOn:3},
+    {n:'Capa 5', t:'Aplicación', d:'IA de triaje aislada y de solo lectura; WAF frente a telemedicina — sin ruta de pivote hacia el HIS/EMR.', hitOn:-1},
+    {n:'Capa 6', t:'Datos y respaldo', d:'Copia inmutable con air-gap y política 3-2-1 permitió restaurar sin negociar con el atacante.', hitOn:4},
+  ];
+
+  function renderNistTimeline(){
+    document.getElementById('nistTimeline').innerHTML = NIST_STEPS.map((s,i)=>{
+      const cls = i<state.warroom.step ? 'done' : (i===state.warroom.step ? 'active' : '');
+      return `<div class="nist-step ${cls}"><div class="nt">${s.t}</div><div class="nl">${s.l}</div><div class="nd">${s.d}</div><div class="nr">${s.resp}</div><div class="na">${s.accion}</div></div>`;
+    }).join('');
+    const pct = state.warroom.step<0 ? 0 : ((state.warroom.step+1)/NIST_STEPS.length)*100;
+    document.getElementById('nistProgressFill').style.width = pct+'%';
+    document.getElementById('nistTimeLabel').textContent = state.warroom.step<0 ? NIST_STEPS[0].t : NIST_STEPS[state.warroom.step].t;
+    const finding = document.getElementById('findingBox');
+    if(state.warroom.step>=NIST_STEPS.length-1){
+      finding.innerHTML = `<b>Hallazgo clave:</b> se confirmó un permiso de escritura innecesario entre la VLAN administrativa y el respaldo — corregido tras el ejercicio bajo el principio de mínimo privilegio. RTO objetivo del EMR &lt; 15 minutos; restauración real en este ejercicio: 22 minutos.`;
+    } else {
+      finding.innerHTML = `<b>Hallazgo clave:</b> un permiso de escritura innecesario entre la VLAN administrativa y el respaldo — se confirmará al completar la simulación.`;
+    }
+
+    document.getElementById('impactGrid').innerHTML = IMPACT_KPIS.map((k,i)=>{
+      const active = state.warroom.step >= i;
+      return `<div class="impact-card ${active?'ok':'pending'}"><div class="v">${active? k.v : '—'}</div><div class="l">${k.l}</div></div>`;
+    }).join('');
+
+    document.getElementById('defenseGrid').innerHTML = DEFENSE_LAYERS.map(layer=>{
+      const hit = layer.hitOn>=0 && state.warroom.step>=layer.hitOn;
+      return `<div class="defense-card ${hit?'hit':''}"><div class="dn">${layer.n}</div><h4>${layer.t}</h4><p>${layer.d}</p></div>`;
+    }).join('');
+  }
+
+  let nistTimer = null;
+  function playNist(){
+    if(state.warroom.playing) return;
+    state.warroom.playing = true;
+    document.getElementById('nistPlayBtn').disabled = true;
+    function step(){
+      state.warroom.step++;
+      renderNistTimeline(); renderTopology(); window.__ms_renderDashboard();
+      if(state.warroom.step < NIST_STEPS.length-1){
+        nistTimer = setTimeout(step, 1300);
+      } else {
+        state.warroom.playing = false;
+        document.getElementById('nistPlayBtn').disabled = false;
+        state.eventosSeguridad.unshift({timestamp:new Date(), descripcion:'Simulación NIST SP 800-61 completada: ransomware por phishing contenido y erradicado. Restauración en 22 minutos.', accion:'Recuperado'});
+        renderAuditoria();
+      }
+    }
+    step();
+  }
+  document.getElementById('nistPlayBtn').addEventListener('click', playNist);
+  document.getElementById('nistResetBtn').addEventListener('click', ()=>{
+    clearTimeout(nistTimer);
+    state.warroom.playing=false; state.warroom.step=-1;
+    document.getElementById('nistPlayBtn').disabled=false;
+    renderNistTimeline(); renderTopology(); window.__ms_renderDashboard();
+  });
+
+  window.__ms_renderTopology = renderTopology;
+  window.__ms_renderNistTimeline = renderNistTimeline;
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  /* =========================================================
+     6. ESCALABILIDAD A 5 AÑOS
+     ========================================================= */
+  const PHASES = {
+    1:{
+      label:'Año 1–2', title:'Consolidación y crecimiento orgánico',
+      operacion:'Crecimiento orgánico de consulta externa (20%) y consolidación de la app de pacientes.',
+      infra:'Escalado horizontal del clúster HIS/EMR a 3–4 nodos, sin cambios de VLAN.',
+      kpis:[['1 sede','Ubicación operativa'],['3–4 nodos','Clúster HIS/EMR'],['+20%','Crecimiento consulta externa']],
+      nodes:1, vpn:false, fhir:false,
+    },
+    2:{
+      label:'Año 2–3', title:'Expansión a segunda sede',
+      operacion:'Apertura de una segunda sede o punto de atención satélite con personal propio.',
+      infra:'Federación de IAM/RBAC entre sedes vía VPN site-to-site hacia el firewall central.',
+      kpis:[['2 sedes','Ubicaciones operativas'],['VPN site-to-site','Federación IAM/RBAC'],['1 firewall central','Punto de control']],
+      nodes:2, vpn:true, fhir:false,
+    },
+    3:{
+      label:'Año 3–5', title:'Integración con la red pública de salud',
+      operacion:'Integración con la red pública de salud para intercambio de historiales clínicos.',
+      infra:'Adopción de HL7/FHIR y migración a esquema multi-nube con conmutación por error.',
+      kpis:[['HL7/FHIR','Estándar de intercambio'],['Multi-nube','Con failover automático'],['Red pública','Interoperabilidad de historiales']],
+      nodes:2, vpn:true, fhir:true,
+    },
+  };
+
+  function renderScaleSvg(phase){
+    const svg = document.getElementById('scaleSvg');
+    const p = PHASES[phase];
+    let html = '';
+    // Sede central
+    html += `<g><rect x="60" y="100" width="150" height="70" rx="12" fill="var(--primary-soft)" stroke="var(--primary)" stroke-width="1.6"/>
+      <text x="135" y="130" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)" font-family="Inter">Sede central</text>
+      <text x="135" y="146" text-anchor="middle" font-size="9.5" fill="var(--ink-faint)" font-family="Inter">Guayaquil</text>
+      <text x="135" y="160" text-anchor="middle" font-size="9" fill="var(--primary)" font-family="Inter">HIS/EMR · ${p.nodes>1?'3–4 nodos':'1–2 nodos'}</text>
+    </g>`;
+    // Cluster nodes
+    for(let i=0;i<3;i++){
+      html += `<rect x="${72+i*46}" y="176" width="36" height="14" rx="4" fill="var(--surface)" stroke="var(--border-strong)"/>`;
+    }
+    if(p.nodes>=2){
+      html += `<g><rect x="340" y="100" width="150" height="70" rx="12" fill="var(--surface-alt)" stroke="var(--border-strong)" stroke-width="1.6"/>
+        <text x="415" y="130" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)" font-family="Inter">Sede satélite</text>
+        <text x="415" y="146" text-anchor="middle" font-size="9.5" fill="var(--ink-faint)" font-family="Inter">Punto de atención 2</text>
+        <text x="415" y="160" text-anchor="middle" font-size="9" fill="var(--accent2)" font-family="Inter">IAM/RBAC federado</text>
+      </g>`;
+      html += `<line x1="210" y1="135" x2="340" y2="135" stroke="${p.vpn?'var(--accent2)':'var(--border-strong)'}" stroke-width="2" stroke-dasharray="${p.vpn?'6 4':''}"/>`;
+      if(p.vpn) html += `<text x="275" y="125" text-anchor="middle" font-size="9" fill="var(--accent2)" font-family="Inter">VPN site-to-site</text>`;
+    }
+    if(p.fhir){
+      html += `<g><rect x="620" y="60" width="150" height="60" rx="12" fill="var(--verde-soft)" stroke="var(--verde)" stroke-width="1.6"/>
+        <text x="695" y="86" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)" font-family="Inter">Red pública salud</text>
+        <text x="695" y="102" text-anchor="middle" font-size="9" fill="var(--verde-ink)" font-family="Inter">Estándar HL7/FHIR</text>
+      </g>`;
+      html += `<line x1="490" y1="135" x2="620" y2="95" stroke="var(--verde)" stroke-width="2" stroke-dasharray="5 4"/>`;
+      html += `<g><rect x="620" y="150" width="150" height="60" rx="12" fill="var(--surface-alt)" stroke="var(--border-strong)" stroke-width="1.6"/>
+        <text x="695" y="176" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)" font-family="Inter">Multi-nube</text>
+        <text x="695" y="192" text-anchor="middle" font-size="9" fill="var(--ink-faint)" font-family="Inter">Conmutación por error</text>
+      </g>`;
+      html += `<line x1="490" y1="135" x2="620" y2="180" stroke="var(--border-strong)" stroke-width="2"/>`;
+    }
+    svg.innerHTML = html;
+  }
+
+  function renderScalePhase(phase){
+    state.scalePhase = phase;
+    document.querySelectorAll('.phase-tab').forEach(t=>t.setAttribute('aria-selected', String(+t.dataset.phase===phase)));
+    const p = PHASES[phase];
+    renderScaleSvg(phase);
+    document.getElementById('scaleKpis').innerHTML = p.kpis.map(([v,l])=>`<div class="card scale-kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+    document.getElementById('scaleNote').innerHTML = `<b style="color:var(--ink);">${p.title}.</b><br>Operación: ${p.operacion}<br>Infraestructura: ${p.infra}`;
+  }
+  document.getElementById('phaseTabs').addEventListener('click', e=>{
+    const b = e.target.closest('.phase-tab'); if(!b) return;
+    renderScalePhase(+b.dataset.phase);
+  });
+
+  window.__ms_renderScalePhase = renderScalePhase;
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+  /* =========================================================
+     7. AUDITORÍA
+     ========================================================= */
+  function renderAuditoria(){
+    const body = document.getElementById('auditBody');
+    if(state.pacientes.length===0){
+      body.innerHTML = `<tr><td colspan="9" style="color:var(--ink-faint);">Sin evaluaciones registradas en esta sesión.</td></tr>`;
+    } else {
+      body.innerHTML = [...state.pacientes].sort((a,b)=>b.timestamp-a.timestamp).map(p=>`
+        <tr>
+          <td class="mono" style="font-size:11px;">${fmt(p.timestamp)}</td>
+          <td class="mono">${p.id}</td>
+          <td>${esc(p.nombre)}</td>
+          <td class="mono" style="font-weight:700;">${p.score}</td>
+          <td>${esc(p.factorPrincipal.nombre)} <span class="pill ${pillClassOf(p.factorPrincipal.pts)}" style="margin-left:4px;">+${p.factorPrincipal.pts}</span></td>
+          <td><span class="pill pill-${p.nivelIA}">${p.nivelIA}</span></td>
+          <td><span class="pill pill-${p.nivelEnfermera}">${p.nivelEnfermera}</span></td>
+          <td>${p.overridden ? 'Sí' : 'No'}</td>
+          <td style="font-size:11.5px;color:var(--ink-soft);">${esc(p.origen)}</td>
+        </tr>`).join('');
+    }
+    const secList = document.getElementById('secEventsList');
+    if(state.eventosSeguridad.length===0){
+      secList.innerHTML = `<div class="mini-row"><span class="txt" style="color:var(--ink-faint);">Sin eventos de seguridad registrados en esta sesión.</span></div>`;
+    } else {
+      secList.innerHTML = [...state.eventosSeguridad].sort((a,b)=>b.timestamp-a.timestamp).map(ev=>`
+        <div class="mini-row"><span class="t">${fmt(ev.timestamp)}</span><span class="txt">${esc(ev.descripcion)}</span><span class="pill pill-Verde" style="flex-shrink:0;">${esc(ev.accion)}</span></div>`).join('');
+    }
+  }
+  function pillClassOf(pts){ return pts>=17?'pill-Rojo':pts>=12?'pill-Naranja':pts>=7?'pill-Amarillo':'pill-Verde'; }
+
+  window.renderAuditoria = renderAuditoria;
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+  /* =========================================================
+     8. INICIALIZACIÓN
+     ========================================================= */
+  function seedDemo(){
+    state.pacientes = [];
+    state.eventosSeguridad = [
+      {timestamp:new Date(Date.now()-1000*60*42), descripcion:'Inicio de sesión MFA verificado en estación de enfermería 3.', accion:'Normal'},
+    ];
+    const semillas = [
+      {nombre:'Luis Andrade', fc:132, pas:172, spo2:89, temp:38.9, motivoIdx:0, origen:'Emergencia'},
+      {nombre:'Patricia Vera', fc:88, pas:118, spo2:97, temp:36.9, motivoIdx:7, origen:'Recepción presencial'},
+      {nombre:'Diego Salcedo', fc:76, pas:120, spo2:98, temp:36.6, motivoIdx:10, origen:'Kiosco de autorregistro'},
+      {nombre:'Rosa Mendieta', fc:104, pas:138, spo2:94, temp:37.8, motivoIdx:6, origen:'Recepción presencial', alta:true},
+    ];
+    semillas.forEach(s=>{
+      const r = window.__ms_calcularTriage({fc:s.fc,pas:s.pas,spo2:s.spo2,temp:s.temp,motivoIdx:s.motivoIdx});
+      const p = {
+        id:'PX-'+(nextPatientId++), nombre:s.nombre, timestamp:new Date(Date.now()-Math.random()*1000*60*90),
+        score:r.score, factorPrincipal:r.factores[0], nivelIA:r.nivel, nivelEnfermera:r.nivel, overridden:false, origen:s.origen,
+        cama:null, alta:false,
+      };
+      window.__ms_asignarCama(p);
+      if(s.alta){ p.alta = true; p.cama = null; }
+      state.pacientes.push(p);
+    });
+  }
+
+  function init(){
+    window.__ms_poblarMotivos();
+    seedDemo();
+    renderAuditoria();
+    window.__ms_renderDashboard();
+    window.__ms_renderDeviceGrid();
+    window.__ms_renderTopology();
+    window.__ms_renderNistTimeline();
+    window.__ms_renderScalePhase(1);
+    window.__ms_actualizarBadges();
+    window.__ms_resizeEcg();
+    window.__ms_drawEcg();
+    tickClock(); setInterval(tickClock, 1000);
+    setInterval(window.__ms_tickTelemetry, 2200);
+
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      if(!confirm('¿Reiniciar la demo a su estado inicial? Se perderán los registros de esta sesión.')) return;
+      state.alertaIot = null;
+      window.__ms_DEVICE_STATE.forEach(d=>{ d.status='normal'; });
+      state.warroom = {step:-1, playing:false};
+      seedDemo();
+      window.__ms_ocultarBannerIot();
+      renderAuditoria();
+      window.__ms_renderDashboard();
+      window.__ms_renderDeviceGrid();
+      window.__ms_renderTopology();
+      window.__ms_renderNistTimeline();
+      window.__ms_actualizarBadges();
+      document.getElementById('resultCard').classList.add('hidden');
+      document.getElementById('triageForm').reset();
+      irATab('soc');
+    });
+  }
+  init();
+})();
+</script>
+</body>
+</html>
